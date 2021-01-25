@@ -58,7 +58,7 @@ The architecture also includes 2 database tables used for staging purpose:
 
 The architecture includes 5 other databases organized in a STAR schema. Those other databases can be used and queries by business analysts. Below shows a representation of the STAR schema and respective tables.
 
-![STAR Schema](./images/DBDesign.JPG)
+![STAR Schema](./images/DBDesign.JPEG)
 
 ## Lessons learned
 We faced a few challenges during this project. In this section, we share the few lessons learned.
