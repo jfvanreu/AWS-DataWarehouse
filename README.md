@@ -9,22 +9,24 @@ This project includes the following files:
 - **sql_queries.py**: a file which includes all the SQL queries used in our project. In this project, we create and delete tables. We also insert data in our tables.
 - **create_tables.py**: Python script which uses sql_queries to create our project tables.
 - **etl.py**: Extract, Transform and Load (ETL) script which transfers data (from AWS S3) and transforms it into our STAR model data schema.
-- **RedshiftSetup.ipynb**: Jupyter Notebook which highlights the various steps in order to create and delete a Redshit datawarehouse on AWS.
+- **RedshiftClusterSetup.ipynb**: Jupyter Notebook which highlights the various steps in order to create and delete a Redshit datawarehouse on AWS.
 - **README.md**: The file you're reading right now.
 
 # Instructions
-## Create an AWS Admin Account
+If you already have access to an AWS Redshift cluster, skip to step 4. Otherwise, follow instructions outlined in Step 1 to 3.
+
+## Step 1 - Create an AWS Admin Account
 The first step for this project is to create your AWS Admin Account which allows you to secure a Redshift data warehouse, create users, copy files to S3, etc...
 Simply log into AWS and create this user in the IAM console. Once the user is created, you will receive a key-secret pair. This pair shouldn't be stored online because it would allows others to use AWS at your expenses!! Handle with care!
 
-## Update Data Warehouse Config file
+## Step 2 - Update Data Warehouse Config file
 Type in your key and secret in the dwh.cfg file. Make sure you don't *push* this file back to git for the reasons explained above.
 
-## Create an AWS Redshift data warehouse
-Since you now have an AWS admin account, you can secure some AWS resources such as a redshift data warehouse. We can secure those resources by using the AWS admin console (online) or by using a Python API. We also create an ARN policy which enables Redshift to access S3 storage environment in ReadOnly mode. In our case, we decided to create this AWS Redshift resource with the Python SDK. We included the instructions in the following Jupyter Notebook: **RedshiftSetup.ipynb**
+## Step 3 - Create an AWS Redshift data warehouse
+Since you now have an AWS admin account, you can secure some AWS resources such as a redshift data warehouse. We can secure those resources by using the AWS admin console (online) or by using a Python API. We also create an ARN policy which enables Redshift to access S3 storage environment in ReadOnly mode. In our case, we decided to create this AWS Redshift resource with the Python SDK. We included the instructions in the following Jupyter Notebook: **RedshiftClusterSetup.ipynb**
 
-## Update Data Warehouse Config file
-Once the Redshift data warehouse is up and running, you can add its end-point (a.k.a address) and ARN policy that we created in the previous step to the dwh.cfg file.
+## Step 4 - Update Data Warehouse Config file
+Once the Redshift data warehouse is up and running, you can add its end-point (a.k.a address) and ARN policy that we created in the previous step to the **dwh.cfg** file.
 
 ## Create Tables
 Now, it's time to create some tables in our data warehouse. We can do so by simply running the following Python script: **create_tables.py**.
@@ -33,7 +35,7 @@ Now, it's time to create some tables in our data warehouse. We can do so by simp
 Assuming that the tables get created properly, we can now initiate our ETL process by **running the ETL.py script**.
 
 ## Access Redshift from Tableau
-As a bonus, we can connect to Redshift from Tableau by providing the end-point and user credentials included in the config.dwb file.
+As a bonus, we can connect to Redshift from Tableau by providing the end-point and user credentials included in the **config.dwb** file.
 
 # Project Details
 In this section we provide more details on the project such as the data warehouse architecture, data base schema, lessons learned, Tableau dashboard and insights.
@@ -70,14 +72,12 @@ Here are the commands that we use to transfer both datasets from S3 into the sta
   staging_events_copy = ("""copy staging_events from {}
                             credentials 'aws_iam_role={}'
                             region 'us-west-2'
-                            json {};
-  """).format(LOG_DATA, DWH_ROLE_ARN, LOG_JSONPATH)
+                            json {};""").format(LOG_DATA, DWH_ROLE_ARN, LOG_JSONPATH)
 
   staging_songs_copy = ("""COPY staging_songs from {}
                           credentials 'aws_iam_role={}'
                           region 'us-west-2'
-                          json 'auto';                     
-  """).format(SONG_DATA, DWH_ROLE_ARN)
+                          json 'auto';""").format(SONG_DATA, DWH_ROLE_ARN)
 </CODE></PRE>
 
 In the first copy command, we copy the log data (path available in LOG_DATA variable) to the staging_events table. We also provide the user role that we created with the data warehouse. This role has read access to S3. We also pass on the LOG_JSONPATH argument to this COPY command so it can match the data as organized on S3 to the data in the staging_events database.
