@@ -130,8 +130,8 @@ By analyzing the data in Tableau, we managed to discover a few business insights
 
 * These were the most popular songs during the same time frame: **The Small Print, Super Massive Blackhole** and **Stockholm Syndrome**, all by Muse.
 
-![Top Songs in Free Model](./images/TopSongsFreeModel.png)
-![Top Songs in Paid Model](./images/TopSongsPaidModel.png)
+![Top Songs in Free Model](./images/MostPlayedSongsFreeModel.png)
+![Top Songs in Paid Model](./images/MostPlayedSongsPaidModel.png)
 
 All those sheets can be combined in a Sparkify dashboard as follows.
 
