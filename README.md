@@ -28,11 +28,19 @@ Since you now have an AWS admin account, you can secure some AWS resources such 
 ## Step 4 - Update Data Warehouse Config file
 Once the Redshift data warehouse is up and running, you can add its end-point (a.k.a address) and ARN policy that we created in the previous step to the **dwh.cfg** file.
 
-## Create Tables
+## Step 5 - Create Tables
 Now, it's time to create some tables in our data warehouse. We can do so by simply running the following Python script: **create_tables.py**.
+The script should run without any error.
 
-## ETL process
-Assuming that the tables get created properly, we can now initiate our ETL process by **running the ETL.py script**.
+## Step 6 - ETL process
+Assuming that the tables get created properly, we can now initiate our ETL process by **running the ETL.py script**. This script will take about **5 minutes** to complete.
+
+# Check the data in AWS Redshift
+Once the scripts are completed as expected, we can verify that the databases were properly populated by using Redshift SQL Query Editor tool.
+![SQL Query Editor](./images/QueryEditor.png)
+
+In the Query Editor, we can verify that the 2 staging tables were created as expected. We also have the 5 tables from our STAR schma.
+We also performed a few queries on the table to verify that they were populated with data.
 
 ## Access Redshift from Tableau
 As a bonus, we can connect to Redshift from Tableau by providing the end-point and user credentials included in the **config.dwb** file.
@@ -84,6 +92,21 @@ In the first copy command, we copy the log data (path available in LOG_DATA vari
 
 For the transfers to succeed, we also need to ensure that the data types match or get converted as expected.
 
+### Using the Query Editor
+The Query Editor ended up being a great tool to test our various upsert queries before adding them to our script.
+
+### On Conflict doesn't exist in Redshift
+In Postgres, we can use the On Conflict keyword to handle cases where we have duplicated primary keys for example. On Conflict is not available in Redshift, so we had to come up with an alternative.
+
+<PRE><CODE>
+  user_table_insert = ("""INSERT INTO users (user_id, first_name, last_name, gender, level)
+                            SELECT DISTINCT userId, firstName, lastName, gender, level
+                            FROM staging_events
+                            WHERE page = 'NextSong' AND userId NOT IN (SELECT DISTINCT user_id FROM users);""")
+</CODE></PRE>
+
+In the situation above, we indicate that we will add records only if they are associated to a unique (not distinct) user_id.
+
 ## Accessing Data Warehouse via Tableau
 The main purpose of a data warehouse is to prepare data such that business analysts can analyze this data and extract insights from it. To verify that this would be possible, we decided to create a few work sheets in Tableau to visualize the data and combined them into a single dashboard.
 
@@ -91,12 +114,28 @@ The main purpose of a data warehouse is to prepare data such that business analy
 By analyzing the data in Tableau, we managed to discover a few business insights:
 
 * The 3 longest songs in the song catalog are **The Stockholm Syndrome, City of Delusion and Exogenesis: Symphony Part 1 (overture)**.
+
+![Longest Songs](./images/LongestSongs.png)
+
 * Artists are mostly located in **Great Britain, USA East Coast and California**.
-* Men are cheaper than women: the proportion of paid customers are predominantly women (75%).
-* These were the most popular artists in Nov 2018 (data time frame): Muse, Radio Head, The Smiths and Usher across all levels.
-* These were the most popular songs during the same time frame: The Small Print, Super Massive Blackhole and Stockholm Syndrome, all by Muse.
+
+![Artists Map](./images/ArtistMap.png)
+
+* **Men are cheaper than women**: The gender distribution shows that we have 66% of female customers against 33% male customers in the free model. However, when we switch to the Paid model, it changes to 75% female versus 25% male.
+
+* These were the most popular artists in Nov 2018 (data time frame): **Muse, Radio Head, The Smiths** and **Usher** across all levels. Below some charts that show how the popularity varies between paid and free models.
+
+![Top Artists in Free Model](./images/TopArtistsFreeModel.png)
+![Top Artists in Paid Model](./images/TopArtistsPaidModel.png)
+
+* These were the most popular songs during the same time frame: **The Small Print, Super Massive Blackhole** and **Stockholm Syndrome**, all by Muse.
+
+![Top Songs in Free Model](./images/TopSongsFreeModel.png)
+![Top Songs in Paid Model](./images/TopSongsPaidModel.png)
 
 All those sheets can be combined in a Sparkify dashboard as follows.
+
+![Sparkify Dashboard](./images/SparkifyDashboard.png)
 
 # Conclusion
 Overall, this is was a fun project. We managed to create a data warehouse which serves as the center piece of an ETL process. Business Analysts can access the data warehouse from BI applications like Tableau and extract insights on how our business is doing.
